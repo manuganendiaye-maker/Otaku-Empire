@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Otaku Empire — Classement des Légendes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #100c1a;
+    --panel: #1a1428;
+    --panel-2: #221a35;
+    --line: #332a4d;
+    --red: #ff3b4e;
+    --gold: #ffb703;
+    --text: #f3efe6;
+    --muted: #9a90b8;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Bebas Neue', sans-serif;
+    --body: 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top, rgba(255,59,78,0.08), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  ::selection{ background:var(--red); color:#fff; }
+
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:56px 20px 44px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    background: linear-gradient(180deg, rgba(255,59,78,0.10), transparent 70%);
+  }
+  .hero::before{
+    content:"";
+    position:absolute; left:0; right:0; top:-20%;
+    height:3px;
+    background:linear-gradient(90deg, transparent, var(--red), var(--gold), transparent);
+    box-shadow:0 0 12px 2px rgba(255,59,78,0.6);
+    animation: scan 3.4s linear infinite;
+  }
+  @keyframes scan{
+    0%{ top:-5%; opacity:0; }
+    10%{ opacity:1; }
+    90%{ opacity:1; }
+    100%{ top:105%; opacity:0; }
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    letter-spacing:0.35em;
+    font-size:11px;
+    color:var(--gold);
+    text-transform:uppercase;
+  }
+  .hero h1{
+    font-family:var(--display);
+    font-size:clamp(34px, 9vw, 58px);
+    letter-spacing:0.02em;
+    line-height:1.02;
+    margin:14px 0 12px;
+    text-wrap:balance;
+  }
+  .hero h1 span{ color:var(--red); }
+  .hero p{
+    color:var(--muted);
+    font-size:15px;
+    max-width:440px;
+    margin:0 auto;
+    line-height:1.5;
+  }
+  .stat-row{
+    display:flex;
+    justify-content:center;
+    gap:28px;
+    margin-top:24px;
+    font-family:var(--mono);
+  }
+  .stat-row div{ text-align:center; }
+  .stat-row .n{ font-size:22px; color:var(--gold); }
+  .stat-row .l{ font-size:10px; color:var(--muted); letter-spacing:0.15em; text-transform:uppercase; }
+
+  main{ max-width:640px; margin:0 auto; padding:28px 16px 0; }
+  .section-title{
+    font-family:var(--display);
+    font-size:22px;
+    letter-spacing:0.03em;
+    color:var(--text);
+    margin-bottom:4px;
+  }
+  .section-sub{ color:var(--muted); font-size:13px; margin-bottom:18px; }
+
+  .rank-list{ display:flex; flex-direction:column; gap:10px; }
+
+  .card{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 14px 12px;
+    position:relative;
+    transition:border-color .2s ease;
+  }
+  .card.voted{ border-color:var(--red); }
+
+  .card-top{ display:flex; align-items:center; gap:12px; }
+  .tier{
+    font-family:var(--display);
+    font-size:20px;
+    width:34px; height:34px;
+    flex:none;
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line);
+    color:var(--text);
+  }
+  .tier.S{ background:rgba(255,183,3,0.16); color:var(--gold); border-color:rgba(255,183,3,0.5); }
+  .tier.A{ background:rgba(255,59,78,0.14); color:var(--red); border-color:rgba(255,59,78,0.4); }
+  .tier.B{ color:var(--text); }
+  .tier.C{ color:var(--muted); }
+
+  .card-name{ flex:1; font-weight:600; font-size:15.5px; letter-spacing:0.01em; }
+  .card-pct{ font-family:var(--mono); font-size:16px; color:var(--gold); min-width:50px; text-align:right; }
+
+  .bar-track{
+    margin-top:10px;
+    height:9px;
+    border-radius:5px;
+    background:#0d0a16;
+    border:1px solid var(--line);
+    overflow:hidden;
+    position:relative;
+  }
+  .bar-fill{
+    height:100%;
+    border-radius:5px;
+    background:repeating-linear-gradient(
+      90deg,
+      var(--fill-color, var(--red)) 0px, var(--fill-color, var(--red)) 6px,
+      rgba(0,0,0,0.18) 6px, rgba(0,0,0,0.18) 8px
+    );
+    width:0%;
+    transition:width .6s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .card-bottom{ display:flex; justify-content:space-between; align-items:center; margin-top:9px; }
+  .votes-count{ font-family:var(--mono); font-size:11px; color:var(--muted); }
+  .vote-btn{
+    font-family:var(--body);
+    font-weight:600;
+    font-size:12.5px;
+    padding:7px 14px;
+    border-radius:20px;
+    border:1px solid var(--red);
+    background:transparent;
+    color:var(--red);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .vote-btn:active{ transform:scale(0.96); }
+  .vote-btn.active{ background:var(--red); color:#fff; }
+  .vote-btn:disabled{ opacity:0.5; }
+
+  .add-box{
+    margin:28px 0 8px;
+    padding:16px;
+    border:1px dashed var(--line);
+    border-radius:10px;
+    text-align:center;
+  }
+  .add-box p{ color:var(--muted); font-size:13px; margin-bottom:10px; }
+  .add-row{ display:flex; gap:8px; }
+  .add-row input{
+    flex:1;
+    background:#0d0a16;
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:10px 12px;
+    border-radius:8px;
+    font-size:14px;
+    font-family:var(--body);
+  }
+  .add-row input:focus{ outline:none; border-color:var(--red); }
+  .add-row button{
+    background:var(--gold);
+    color:#1a1400;
+    border:none;
+    padding:0 16px;
+    border-radius:8px;
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:36px;
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.1em;
+    padding:0 20px;
+  }
+
+  .loading{ text-align:center; padding:40px 0; color:var(--muted); font-family:var(--mono); font-size:13px; }
+  .toast{
+    position:fixed;
+    left:50%; bottom:24px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--panel-2);
+    border:1px solid var(--red);
+    color:var(--text);
+    padding:10px 18px;
+    border-radius:24px;
+    font-size:13px;
+    opacity:0;
+    transition:all .25s ease;
+    pointer-events:none;
+    z-index:50;
+    max-width:85vw;
+    text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="eyebrow">Otaku Empire · Classement live</div>
+    <h1>Quel anime règne sur <span>l'Empire</span> ?</h1>
+    <p>Vote pour ton anime préféré et regarde le classement bouger en temps réel, à mesure que la communauté vote.</p>
+    <div class="stat-row">
+      <div><div class="n" id="totalVotes">—</div><div class="l">votes</div></div>
+      <div><div class="n" id="totalAnime">—</div><div class="l">animés</div></div>
+    </div>
+  </div>
+
+  <main>
+    <div class="section-title">Classement de puissance</div>
+    <div class="section-sub">Tape sur "Voter" pour choisir ton champion. Tu peux changer d'avis à tout moment.</div>
+
+    <div id="listWrap"><div class="loading">Chargement du classement…</div></div>
+    <div id="debugBox" style="display:none; margin-top:14px; padding:12px; border:1px solid var(--red); border-radius:8px; background:rgba(255,59,78,0.08); font-family:var(--mono); font-size:11px; color:var(--muted); word-break:break-word;"></div>
+
+    <div class="add-box">
+      <p>Ton anime préféré n'est pas dans la liste ?</p>
+      <div class="add-row">
+        <input id="newAnimeInput" type="text" placeholder="Nom de l'animé" maxlength="40">
+        <button id="addAnimeBtn">Ajouter</button>
+      </div>
+    </div>
+
+    <footer>OTAKU EMPIRE · CLASSEMENT COMMUNAUTAIRE</footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+// ---- Base de données partagée (Firebase Realtime Database) ----
+const DEFAULT_ANIME = [
+  "Demon Slayer","Jujutsu Kaisen","One Piece","L'Attaque des Titans",
+  "Naruto","Death Note","Dragon Ball Z","Berserk",
+  "Bleach","One Punch Man","Solo Leveling","Fullmetal Alchemist: Brotherhood"
+];
+const DB_URL = 'https://otaku-empire-f554b-default-rtdb.europe-west1.firebasedatabase.app/otaku-data.json';
+const MY_VOTE_KEY = 'otaku-empire-my-vote';
+
+const listWrap = document.getElementById('listWrap');
+const toastEl = document.getElementById('toast');
+let busy = false;
+
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  setTimeout(()=> toastEl.classList.remove('show'), 2000);
+}
+
+function showDebug(label, detail){
+  const box = document.getElementById('debugBox');
+  box.style.display = 'block';
+  box.textContent = 'DIAGNOSTIC — ' + label + ' : ' + detail;
+}
+
+function tierFor(rank){
+  if(rank === 1) return 'S';
+  if(rank <= 3) return 'A';
+  if(rank <= 6) return 'B';
+  return 'C';
+}
+function colorFor(tier){
+  if(tier==='S') return '#ffb703';
+  if(tier==='A') return '#ff3b4e';
+  if(tier==='B') return '#c78bff';
+  return '#6f6690';
+}
+
+async function fetchData(){
+  let res;
+  try{
+    res = await fetch(DB_URL);
+  }catch(networkErr){
+    throw new Error('LECTURE bloquée avant même la réponse (' + networkErr.message + ')');
+  }
+  if(!res.ok) throw new Error('LECTURE a répondu avec le statut ' + res.status + ' ' + res.statusText);
+  let data = await res.json();
+  if(!data){ data = {}; }
+  if(!data.votes) data.votes = {};
+  if(!data.animeList) data.animeList = DEFAULT_ANIME.slice();
+  return data;
+}
+
+async function saveData(data){
+  let res;
+  try{
+    res = await fetch(DB_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  }catch(networkErr){
+    throw new Error('ÉCRITURE bloquée avant même la réponse (' + networkErr.message + ')');
+  }
+  if(!res.ok) throw new Error('ÉCRITURE a répondu avec le statut ' + res.status + ' ' + res.statusText);
+  return true;
+}
+
+function getMyVote(){
+  try{ return localStorage.getItem(MY_VOTE_KEY); }catch(e){ return null; }
+}
+function setMyVote(name){
+  try{ localStorage.setItem(MY_VOTE_KEY, name); }catch(e){}
+}
+
+let state = { votes: {}, animeList: [] };
+let myVote = null;
+
+function render(){
+  const entries = state.animeList.map(name => ({ name, count: state.votes[name] || 0 }));
+  const total = entries.reduce((s,e)=> s + e.count, 0);
+  entries.sort((a,b)=> b.count - a.count);
+
+  document.getElementById('totalVotes').textContent = total;
+  document.getElementById('totalAnime').textContent = state.animeList.length;
+
+  if(entries.length === 0){
+    listWrap.innerHTML = '<div class="loading">Aucun animé pour le moment. Ajoute le premier !</div>';
+    return;
+  }
+
+  listWrap.innerHTML = '<div class="rank-list"></div>';
+  const list = listWrap.querySelector('.rank-list');
+
+  entries.forEach((e, i) => {
+    const rank = i + 1;
+    const tier = tierFor(rank);
+    const color = colorFor(tier);
+    const pct = total > 0 ? Math.round((e.count / total) * 1000) / 10 : 0;
+    const isVoted = myVote === e.name;
+
+    const card = document.createElement('div');
+    card.className = 'card' + (isVoted ? ' voted' : '');
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="tier ${tier}">${tier}</div>
+        <div class="card-name">${e.name}</div>
+        <div class="card-pct">${pct}%</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="--fill-color:${color}; width:${pct}%"></div></div>
+      <div class="card-bottom">
+        <div class="votes-count">${e.count} vote${e.count !== 1 ? 's' : ''}</div>
+        <button class="vote-btn ${isVoted ? 'active' : ''}" data-name="${e.name.replace(/"/g,'&quot;')}" ${busy ? 'disabled' : ''}>
+          ${isVoted ? '✓ Voté' : 'Voter'}
+        </button>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('.vote-btn').forEach(btn => {
+    btn.addEventListener('click', () => handleVote(btn.dataset.name));
+  });
+}
+
+async function handleVote(name){
+  if(busy || myVote === name) return;
+  busy = true;
+  const previous = myVote;
+  render();
+
+  try{
+    // relire les données fraîches juste avant d'écrire, pour limiter les conflits
+    const fresh = await fetchData();
+    if(previous) fresh.votes[previous] = Math.max(0, (fresh.votes[previous] || 0) - 1);
+    fresh.votes[name] = (fresh.votes[name] || 0) + 1;
+    await saveData(fresh);
+    state = fresh;
+    myVote = name;
+    setMyVote(name);
+    showToast(`Vote enregistré pour ${name} !`);
+  }catch(e){
+    showToast("Erreur réseau — réessaie dans un instant.");
+    showDebug('VOTE', e.message);
+  }finally{
+    busy = false;
+    render();
+  }
+}
+
+document.getElementById('addAnimeBtn').addEventListener('click', async () => {
+  if(busy) return;
+  const input = document.getElementById('newAnimeInput');
+  const name = input.value.trim();
+  if(!name) return;
+  if(state.animeList.some(a => a.toLowerCase() === name.toLowerCase())){
+    showToast("Cet animé est déjà dans la liste.");
+    return;
+  }
+  busy = true;
+  render();
+  try{
+    const fresh = await fetchData();
+    if(!fresh.animeList.some(a => a.toLowerCase() === name.toLowerCase())){
+      fresh.animeList.push(name);
+      await saveData(fresh);
+    }
+    state = fresh;
+    input.value = '';
+    showToast(`${name} ajouté au classement !`);
+  }catch(e){
+    showToast("Erreur — impossible d'ajouter l'animé.");
+  }finally{
+    busy = false;
+    render();
+  }
+});
+
+async function init(){
+  myVote = getMyVote();
+  try{
+    state = await fetchData();
+  }catch(e){
+    listWrap.innerHTML = '<div class="loading">Impossible de charger le classement.</div>';
+    showDebug('CHARGEMENT', e.message);
+    return;
+  }
+  render();
+}
+init();
+</script>
+</body>
+</html>
